@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Dark mode default (Engineering Laboratory) */
+  --bg-primary: #0a0d12;
+  --bg-secondary: #12161f;
+  --bg-tertiary: #191f2b;
+  --bg-surface: #141923;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --grid-line: rgba(255, 255, 255, 0.035);
+  
+  --text-primary: #f0f3f6;
+  --text-secondary: #9da7b3;
+  --text-muted: #5f6b7c;
+
+  --accent-amber: #e5a950;
+  --accent-cyan: #06b6d4;
+  --state-normal: #10b981;
+  --state-watch: #f59e0b;
+  --state-degraded: #f97316;
+  --state-untrusted: #ef4444;
+}
+
+html.light {
+  /* Light mode (Technical Journal) */
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f2eee6;
+  --bg-tertiary: #e7e0d3;
+  --bg-surface: #ffffff;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.22);
+  --grid-line: rgba(0, 0, 0, 0.035);
+
+  --text-primary: #1a1714;
+  --text-secondary: #4d463f;
+  --text-muted: #7d7367;
+
+  --accent-amber: #b45309;
+  --accent-cyan: #0891b2;
+  --state-normal: #059669;
+  --state-watch: #d97706;
+  --state-degraded: #ea580c;
+  --state-untrusted: #dc2626;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Subtle Technical Grid Background */
+.bg-tech-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+}
+
+/* Fine Technical Borders */
+.border-technical {
+  border: 1px solid var(--border-subtle);
+}
+
+.border-technical-strong {
+  border: 1px solid var(--border-strong);
+}
+
+/* Custom Scrollbar for Telemetry Matrix */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
