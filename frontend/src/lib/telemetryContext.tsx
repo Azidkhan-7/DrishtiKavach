@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { TelemetryPoint, SystemTrustState, AnomalyEventItem } from './types';
+import { LocalFault, simulateTelemetry } from './localSimulation';
 
 interface TelemetryContextValue {
   telemetry: TelemetryPoint;
@@ -91,8 +92,8 @@ const DEFAULT_TRUST: SystemTrustState = {
 
 const TelemetryContext = createContext<TelemetryContextValue | null>(null);
 
-const BACKEND_BASE = 'http://127.0.0.1:8000';
-const WS_BASE = 'ws://127.0.0.1:8000/ws/telemetry';
+const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? '').replace(/\/$/, '');
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL ?? (BACKEND_BASE ? `${BACKEND_BASE.replace(/^http/, 'ws')}/ws/telemetry` : '');
 
 export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const [telemetry, setTelemetry] = useState<TelemetryPoint>(DEFAULT_TELEMETRY);
@@ -104,6 +105,11 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   const wsRef = useRef<WebSocket | null>(null);
+  const telemetryRef = useRef(DEFAULT_TELEMETRY);
+  const trustRef = useRef(DEFAULT_TRUST);
+  const localFaultRef = useRef<LocalFault | null>(null);
+  const usingBackendRef = useRef(false);
+  const demoTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Sync theme to HTML class
   useEffect(() => {
@@ -120,17 +126,24 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch initial history and events
   const fetchState = useCallback(async () => {
+    if (!BACKEND_BASE) return;
     try {
       const [latestRes, histRes, evtsRes] = await Promise.all([
-        fetch(`${BACKEND_BASE}/api/latest`),
-        fetch(`${BACKEND_BASE}/api/history?limit=40`),
-        fetch(`${BACKEND_BASE}/api/events?limit=15`)
+        fetch(`${BACKEND_BASE}/api/latest`, { signal: AbortSignal.timeout(5000) }),
+        fetch(`${BACKEND_BASE}/api/history?limit=40`, { signal: AbortSignal.timeout(5000) }),
+        fetch(`${BACKEND_BASE}/api/events?limit=15`, { signal: AbortSignal.timeout(5000) })
       ]);
 
+      if (!latestRes.ok) throw new Error('Telemetry backend unavailable');
       if (latestRes.ok) {
         const lData = await latestRes.json();
-        if (lData.telemetry) setTelemetry(lData.telemetry);
-        if (lData.trust) setTrust(lData.trust);
+        if (!lData.telemetry || !lData.trust) throw new Error('Invalid telemetry response');
+        telemetryRef.current = lData.telemetry;
+        trustRef.current = lData.trust;
+        setTelemetry(lData.telemetry);
+        setTrust(lData.trust);
+        usingBackendRef.current = true;
+        localFaultRef.current = null;
         setActiveFault(lData.active_fault || null);
       }
       if (histRes.ok) {
@@ -142,33 +155,29 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
         setEvents(eData);
       }
     } catch {
-      // Backend not yet reachable - fallback to simulated local ticks
-      simulateLocalTick();
+      usingBackendRef.current = false;
     }
   }, []);
 
   // Local tick fallback
   const simulateLocalTick = useCallback(() => {
-    setTelemetry(prev => {
-      const jitter = (Math.random() - 0.5) * 0.4;
-      const newDist = Math.max(20, Math.min(400, prev.distance + jitter));
-      const pt: TelemetryPoint = {
-        ...prev,
-        distance: Number(newDist.toFixed(2)),
-        temperature: Number((25.3 + Math.sin(Date.now() / 20000) * 0.3).toFixed(2)),
-        humidity: Number((58.4 + Math.cos(Date.now() / 25000) * 0.5).toFixed(2)),
-        timestamp: Date.now() / 1000
-      };
-      setHistory(h => [...h.slice(-39), pt]);
-      return pt;
-    });
+    const snapshot = simulateTelemetry(telemetryRef.current, trustRef.current, localFaultRef.current);
+    telemetryRef.current = snapshot.telemetry;
+    trustRef.current = snapshot.trust;
+    if (!snapshot.activeFault) localFaultRef.current = null;
+    setTelemetry(snapshot.telemetry);
+    setTrust(snapshot.trust);
+    setActiveFault(snapshot.activeFault);
+    setHistory(previous => [...previous.slice(-39), snapshot.telemetry]);
   }, []);
 
   // Setup WebSocket connection with automatic reconnect
   useEffect(() => {
-    let reconnectTimer: NodeJS.Timeout;
+    let reconnectTimer: ReturnType<typeof setTimeout>;
+    let disposed = false;
 
     const connectWs = () => {
+      if (disposed || !WS_BASE) return;
       try {
         const ws = new WebSocket(WS_BASE);
         wsRef.current = ws;
@@ -181,10 +190,14 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
           try {
             const data = JSON.parse(evt.data);
             if (data.telemetry) {
+              usingBackendRef.current = true;
+              localFaultRef.current = null;
+              telemetryRef.current = data.telemetry;
               setTelemetry(data.telemetry);
               setHistory(h => [...h.slice(-39), data.telemetry]);
             }
             if (data.trust) {
+              trustRef.current = data.trust;
               setTrust(data.trust);
             }
             setActiveFault(data.active_fault || null);
@@ -194,40 +207,49 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
         };
 
         ws.onclose = () => {
-          reconnectTimer = setTimeout(connectWs, 3000);
+          usingBackendRef.current = false;
+          if (!disposed) reconnectTimer = setTimeout(connectWs, 3000);
         };
 
         ws.onerror = () => {
           ws.close();
         };
       } catch {
-        reconnectTimer = setTimeout(connectWs, 3000);
+        if (!disposed) reconnectTimer = setTimeout(connectWs, 3000);
       }
     };
 
     connectWs();
-    fetchState();
+    const initialTimer = setTimeout(() => {
+      simulateLocalTick();
+      fetchState();
+    }, 0);
 
     // Periodic events fetch
-    const pollInterval = setInterval(() => {
-      fetch(`${BACKEND_BASE}/api/events?limit=15`)
-        .then(r => r.json())
-        .then(d => { if (Array.isArray(d)) setEvents(d); })
-        .catch(() => {});
-    }, 2500);
+    const pollInterval = setInterval(fetchState, 2500);
+    const simulationInterval = setInterval(() => {
+      if (!usingBackendRef.current) simulateLocalTick();
+    }, 750);
 
     return () => {
+      disposed = true;
+      clearTimeout(initialTimer);
       clearTimeout(reconnectTimer);
       clearInterval(pollInterval);
+      clearInterval(simulationInterval);
+      demoTimersRef.current.forEach(clearTimeout);
+      demoTimersRef.current = [];
       if (wsRef.current) wsRef.current.close();
     };
-  }, [fetchState]);
+  }, [fetchState, simulateLocalTick]);
 
   const injectFault = useCallback(async (faultType: string, targetSensor = 'distance', magnitude?: number) => {
     try {
+      if (!BACKEND_BASE) throw new Error('Browser simulation enabled');
       const res = await fetch(`${BACKEND_BASE}/api/fault`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(5000),
         body: JSON.stringify({
           fault_type: faultType,
           target_sensor: targetSensor,
@@ -235,51 +257,75 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
           duration_seconds: 15.0
         })
       });
+      if (!res.ok) throw new Error('Fault injection unavailable');
       if (res.ok) {
         setActiveFault(faultType);
         fetchState();
       }
     } catch {
-      // Local fallback for offline mode
-      setActiveFault(faultType);
+      usingBackendRef.current = false;
+      const timestamp = Date.now() / 1000;
+      const previousTrust = trustRef.current.sensors.distance.trust_score;
+      localFaultRef.current = faultType === 'reset' ? null : {
+        type: faultType,
+        startedAt: timestamp,
+        expiresAt: timestamp + 15,
+        magnitude: magnitude ?? 238,
+        frozenValue: telemetryRef.current.distance,
+      };
+      simulateLocalTick();
+      if (faultType !== 'reset') {
+        const event: AnomalyEventItem = {
+          event_id: crypto.randomUUID(),
+          timestamp,
+          sensor: 'Ultrasonic (JSN-SR04T)',
+          anomaly_type: faultType,
+          severity: faultType === 'dropout' ? 'CRITICAL' : 'HIGH',
+          confidence: 100,
+          evidence: [`Browser simulation injected a ${faultType} fault; no hardware reading was used.`],
+          assessment: 'Simulated distance anomaly. The stationary IMU provides an independent reference.',
+          previous_trust: previousTrust,
+          new_trust: trustRef.current.sensors.distance.trust_score,
+          raw_reading: telemetryRef.current.distance,
+          baseline_value: 74.2,
+        };
+        setEvents(previous => [event, ...previous].slice(0, 20));
+      }
     }
-  }, [fetchState]);
+  }, [fetchState, simulateLocalTick]);
 
   const resetFaults = useCallback(async () => {
-    try {
-      await fetch(`${BACKEND_BASE}/api/fault`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fault_type: 'reset' })
-      });
-      setActiveFault(null);
-      fetchState();
-    } catch {
-      setActiveFault(null);
-    }
-  }, [fetchState]);
+    demoTimersRef.current.forEach(clearTimeout);
+    demoTimersRef.current = [];
+    setIsDemoRunning(false);
+    await injectFault('reset');
+  }, [injectFault]);
 
   const runDemo = useCallback(async () => {
+    demoTimersRef.current.forEach(clearTimeout);
+    demoTimersRef.current = [];
     setIsDemoRunning(true);
     try {
-      await fetch(`${BACKEND_BASE}/api/demo`, { method: 'POST' });
+      if (!BACKEND_BASE) throw new Error('Browser simulation enabled');
+      const response = await fetch(`${BACKEND_BASE}/api/demo`, { method: 'POST', signal: AbortSignal.timeout(5000) });
+      if (!response.ok) throw new Error('Demo backend unavailable');
     } catch {
       // Offline fallback sequence
       await injectFault('reset');
-      setTimeout(async () => {
+      demoTimersRef.current.push(setTimeout(async () => {
         await injectFault('spike', 'distance', 238);
-        setTimeout(async () => {
+        demoTimersRef.current.push(setTimeout(async () => {
           await injectFault('reset');
           setIsDemoRunning(false);
-        }, 5000);
-      }, 3000);
+        }, 5000));
+      }, 3000));
       return;
     }
 
-    setTimeout(() => {
+    demoTimersRef.current.push(setTimeout(() => {
       setIsDemoRunning(false);
       fetchState();
-    }, 12000);
+    }, 12000));
   }, [injectFault, fetchState]);
 
   return (
