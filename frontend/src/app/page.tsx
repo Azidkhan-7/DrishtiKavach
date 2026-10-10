@@ -44,8 +44,8 @@ export default function HomePage() {
         {/* Hero Centered Layout */}
         <div className="max-w-4xl mx-auto w-full text-center flex flex-col items-center justify-center my-auto py-20 z-10">
           <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl tracking-tight text-[var(--text-primary)] leading-[1.0] mb-6 drop-shadow-sm">
-            SENSOR<br />
-            <span className="italic font-normal text-[var(--accent-amber)]">TRUST</span>
+            DRISHTI<br />
+            <span className="italic font-normal text-[var(--accent-amber)]">KAVACH</span>
           </h1>
 
           <h2 className="font-display text-2xl sm:text-3xl text-[var(--text-secondary)] mb-6 font-normal">
