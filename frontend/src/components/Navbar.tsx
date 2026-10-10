@@ -47,7 +47,7 @@ export default function Navbar() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-display text-lg tracking-tight font-medium text-[var(--text-primary)]">
-                SENSOR TRUST
+                DRISHTIKAVACH
               </span>
               <span className="text-[9px] font-mono tracking-widest px-1.5 py-0.2 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] border border-technical uppercase">
                 MVP v1.0

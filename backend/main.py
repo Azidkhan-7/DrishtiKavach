@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     task.cancel()
 
 app = FastAPI(
-    title="SENSOR TRUST API",
+    title="DRISHTIKAVACH API",
     description="Continuous Intelligence for Physical Sensors - Telemetry & Metrology Diagnostics API",
     version="1.0.0",
     lifespan=lifespan
@@ -54,7 +54,7 @@ app.add_middleware(
 def get_health():
     return {
         "status": "HEALTHY",
-        "service": "SENSOR TRUST Metrology & Diagnostics Engine",
+        "service": "DRISHTIKAVACH Metrology & Diagnostics Engine",
         "version": "1.0.0",
         "mode": simulator.mode,
         "device_id": simulator.device_id,

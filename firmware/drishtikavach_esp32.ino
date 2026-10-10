@@ -1,6 +1,6 @@
 /*
  ============================================================================
-  SENSOR TRUST — ESP32 Physical Telemetry Gateway Firmware
+  DRISHTIKAVACH — ESP32 Physical Telemetry Gateway Firmware
   Continuous Intelligence for Physical Sensors
  ============================================================================
   Target Board: ESP32 / ESP32-S3 (Tensilica Xtensa @ 240MHz)
@@ -31,7 +31,7 @@
 const char* WIFI_SSID     = "YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
-// SENSOR TRUST Backend Endpoint
+// DRISHTIKAVACH Backend Endpoint
 const char* SERVER_ENDPOINT = "http://192.168.1.100:8000/api/telemetry";
 const char* DEVICE_ID       = "esp32-01";
 
@@ -49,7 +49,7 @@ DHT dht(PIN_DHT11_DATA, DHTTYPE);
 void setup() {
   Serial.begin(115200);
   delay(1000);
-  Serial.println("\n[SENSOR TRUST] Initializing Physical Telemetry Node...");
+  Serial.println("\n[DRISHTIKAVACH] Initializing Physical Telemetry Node...");
 
   // Configure Actuator Pins
   pinMode(PIN_LED_GREEN, OUTPUT);
@@ -161,7 +161,7 @@ void loop() {
   Serial.print("[TELEMETRY] Outgoing -> ");
   Serial.println(jsonPayload);
 
-  // 5. Transmit to SENSOR TRUST Backend
+  // 5. Transmit to DRISHTIKAVACH Backend
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.begin(SERVER_ENDPOINT);

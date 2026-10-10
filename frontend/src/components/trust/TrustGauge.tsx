@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { SensorTrustItem, TrustLevel } from '@/lib/types';
+import { DrishtikavachItem, TrustLevel } from '@/lib/types';
 import { ShieldCheck, AlertCircle, AlertTriangle, ShieldX } from 'lucide-react';
 
 interface TrustGaugeProps {
-  item: SensorTrustItem;
+  item: DrishtikavachItem;
 }
 
 export default function TrustGauge({ item }: TrustGaugeProps) {

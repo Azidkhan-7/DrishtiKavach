@@ -26,7 +26,7 @@ class SensorTelemetry(BaseModel):
     source: str = Field("SIMULATION", description="LIVE_HARDWARE | SIMULATION")
     timestamp: float = Field(default_factory=time.time)
 
-class SensorTrustItem(BaseModel):
+class DrishtikavachItem(BaseModel):
     sensor_id: str
     sensor_name: str
     trust_score: float # 0 to 100
@@ -44,7 +44,7 @@ class SystemTrustResponse(BaseModel):
     mode: str # LIVE_HARDWARE | SIMULATION | STALE_DATA | DISCONNECTED
     device_id: str
     last_updated: float
-    sensors: Dict[str, SensorTrustItem]
+    sensors: Dict[str, DrishtikavachItem]
 
 class AnomalyEvent(BaseModel):
     event_id: str

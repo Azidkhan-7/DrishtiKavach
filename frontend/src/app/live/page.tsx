@@ -88,11 +88,11 @@ export default function LiveTelemetryPage() {
         </div>
       </div>
 
-      {/* Sensor Trust Section Header */}
+      {/* Drishtikavach Section Header */}
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 className="font-display text-xl sm:text-2xl text-[var(--text-primary)]">
-            Sensor Trust Integrity Matrices
+            Drishtikavach Integrity Matrices
           </h2>
           <p className="text-xs font-mono text-[var(--text-muted)]">
             Trust score is an indicator of data consistency and sensor behaviour. Not a claim of absolute truth.
@@ -109,7 +109,7 @@ export default function LiveTelemetryPage() {
         )}
       </div>
 
-      {/* Sensor Trust Gauges */}
+      {/* Drishtikavach Gauges */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {trust.sensors.distance && <TrustGauge item={trust.sensors.distance} />}
         {trust.sensors.temperature && <TrustGauge item={trust.sensors.temperature} />}

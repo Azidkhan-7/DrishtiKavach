@@ -18,7 +18,7 @@ export interface TelemetryPoint {
   anomaly_type?: string | null;
 }
 
-export interface SensorTrustItem {
+export interface DrishtikavachItem {
   sensor_id: string;
   sensor_name: string;
   trust_score: number;
@@ -37,7 +37,7 @@ export interface SystemTrustState {
   mode: SystemMode;
   device_id: string;
   last_updated: number;
-  sensors: Record<string, SensorTrustItem>;
+  sensors: Record<string, DrishtikavachItem>;
 }
 
 export interface AnomalyEventItem {

@@ -125,7 +125,7 @@ const ARCH_LAYERS: ArchLayer[] = [
     description: 'Translates raw statistical metrics into an intuitive, bounded 0–100% Trust Score. Classifies channels into Normal (90-100), Watch (70-89), Degraded (40-69), or Untrusted (0-39).',
     tech: ['Empirical Penalization Matrix', 'Weighted Channel Aggregation', 'Classification Heuristics'],
     responsibilities: [
-      'Calculates per-sensor trust based on baseline delta & noise',
+      'Calculates per-drishtikavach based on baseline delta & noise',
       'Applies severe penalty on out-of-range dropouts and frozen registers',
       'Computes system-level composite trust score',
       'Enforces responsible non-absolute confidence bounds'

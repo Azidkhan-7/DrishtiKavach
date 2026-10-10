@@ -183,7 +183,7 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
         wsRef.current = ws;
 
         ws.onopen = () => {
-          console.log('[SENSOR TRUST] WebSocket telemetry stream linked.');
+          console.log('[DRISHTIKAVACH] WebSocket telemetry stream linked.');
         };
 
         ws.onmessage = (evt) => {

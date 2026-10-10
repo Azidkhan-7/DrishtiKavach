@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'SENSOR TRUST — Continuous Intelligence for Physical Sensors',
+  title: 'DRISHTIKAVACH — Continuous Intelligence for Physical Sensors',
   description:
     'Engineering metrology platform for detecting physical sensor anomalies, drift, noise, spikes, frozen readings, dropouts and false alarms through explainable cross-sensor corroboration.',
 };
@@ -28,7 +28,7 @@ export default function RootLayout({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-display text-base tracking-tight text-[var(--text-primary)] font-medium">
-                    SENSOR TRUST
+                    DRISHTIKAVACH
                   </span>
                   <span className="text-[10px] text-[var(--text-muted)] border border-technical px-1.5 py-0.5 rounded">
                     PROD-READY MVP

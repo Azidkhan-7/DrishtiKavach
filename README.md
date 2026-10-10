@@ -1,4 +1,4 @@
-# SENSOR TRUST
+# DRISHTIKAVACH
 > **Tagline:** *"Continuous intelligence for physical sensors."*
 > **Core Architecture:** `SENSE → CHECK → CORRELATE → ASSESS → EXPLAIN`
 
@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-**SENSOR TRUST** is a production-quality metrological instrumentation platform engineered to evaluate the empirical veracity of physical sensor data. Rather than assuming digital sensor packets represent ground truth, SENSOR TRUST continuously monitors data streams to detect:
+**DRISHTIKAVACH** is a production-quality metrological instrumentation platform engineered to evaluate the empirical veracity of physical sensor data. Rather than assuming digital sensor packets represent ground truth, DRISHTIKAVACH continuously monitors data streams to detect:
 - **Offset Drift**: Thermal dissipation or capacitive aging.
 - **Sudden Spikes**: Acoustic multipath reflections or transient inductive glitches.
 - **Increased Noise**: Degraded SNR from ground loops or unshielded jumpers.
@@ -14,7 +14,7 @@
 - **Intermittent Dropouts**: Zero-pulse echo returns or single-wire CRC parity corruptions.
 - **Cross-Signal Incongruence**: Unilateral sensor spikes contradicted by inertial stillness.
 
-Built with an industrial, scientific editorial aesthetic inspired by laboratory instrumentation and metrological research journals, SENSOR TRUST replaces opaque "black-box" machine learning with a **transparent statistical anomaly engine** and **plain-English diagnostic dossiers**.
+Built with an industrial, scientific editorial aesthetic inspired by laboratory instrumentation and metrological research journals, DRISHTIKAVACH replaces opaque "black-box" machine learning with a **transparent statistical anomaly engine** and **plain-English diagnostic dossiers**.
 
 ---
 
@@ -113,7 +113,7 @@ The frontend automatically detects whether real hardware or simulation telemetry
 
 ## 7. Connecting Real ESP32 Hardware
 
-1. Open `firmware/sensor_trust_esp32.ino` in the Arduino IDE or PlatformIO.
+1. Open `firmware/drishtikavach_esp32.ino` in the Arduino IDE or PlatformIO.
 2. Update your Wi-Fi credentials:
    ```cpp
    const char* WIFI_SSID     = "Your_SSID";

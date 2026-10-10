@@ -1,5 +1,5 @@
 from typing import Dict, Any, Tuple
-from app.models import TrustLevel, SensorTrustItem, SystemTrustResponse
+from app.models import TrustLevel, DrishtikavachItem, SystemTrustResponse
 from app.anomaly_engine import StatisticalAnomalyEngine
 import time
 
@@ -21,7 +21,7 @@ class TrustScoreEngine:
         device_id: str = "esp32-01"
     ) -> SystemTrustResponse:
         now = time.time()
-        sensor_items: Dict[str, SensorTrustItem] = {}
+        sensor_items: Dict[str, DrishtikavachItem] = {}
 
         # 1. Ultrasonic (JSN-SR04T)
         dist_val = current_telemetry.get("distance", 72.4)
@@ -58,7 +58,7 @@ class TrustScoreEngine:
         dist_trust = max(0.0, min(100.0, dist_trust))
         dist_status = TrustScoreEngine._score_to_level(dist_trust)
 
-        sensor_items["distance"] = SensorTrustItem(
+        sensor_items["distance"] = DrishtikavachItem(
             sensor_id="distance",
             sensor_name="Ultrasonic Transducer (JSN-SR04T)",
             trust_score=round(dist_trust, 1),
@@ -82,7 +82,7 @@ class TrustScoreEngine:
             temp_notes.append(f"Thermal deviation {abs(temp_z):.2f}σ")
         temp_trust = max(0.0, min(100.0, temp_trust))
 
-        sensor_items["temperature"] = SensorTrustItem(
+        sensor_items["temperature"] = DrishtikavachItem(
             sensor_id="temperature",
             sensor_name="Ambient Temperature (DHT11)",
             trust_score=round(temp_trust, 1),
@@ -104,7 +104,7 @@ class TrustScoreEngine:
             hum_trust -= min(50.0, (abs(hum_z) - 2.5) * 12.0)
         hum_trust = max(0.0, min(100.0, hum_trust))
 
-        sensor_items["humidity"] = SensorTrustItem(
+        sensor_items["humidity"] = DrishtikavachItem(
             sensor_id="humidity",
             sensor_name="Relative Humidity (DHT11)",
             trust_score=round(hum_trust, 1),
@@ -122,7 +122,7 @@ class TrustScoreEngine:
         ay = current_telemetry.get("ay", 0.03)
         az = current_telemetry.get("az", 0.99)
         imu_trust = 95.0
-        sensor_items["accelerometer"] = SensorTrustItem(
+        sensor_items["accelerometer"] = DrishtikavachItem(
             sensor_id="accelerometer",
             sensor_name="Tri-Axis IMU (Inertial Frame)",
             trust_score=round(imu_trust, 1),
