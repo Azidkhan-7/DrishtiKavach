@@ -58,6 +58,14 @@ Built with an industrial, scientific editorial aesthetic inspired by laboratory 
 
 ## 4. Quick Start: Running the MVP
 
+### Netlify deployment
+
+The root `netlify.toml` builds the Next.js application from `frontend/` and publishes `.next`. Netlify automatically provides the Next.js runtime; do not publish the repository root or the unbuilt source directory.
+
+Without a backend configured, the deployed dashboard runs a browser-only simulation with updating telemetry, fault injection, diagnostic events, and the demo sequence. This mode does not receive hardware data, and its temporary state resets when the page reloads.
+
+To connect the existing FastAPI service, host it separately and set `NEXT_PUBLIC_API_BASE_URL` in Netlify before deploying. Use an HTTPS endpoint in production. The WebSocket URL is derived automatically; set `NEXT_PUBLIC_WS_URL` only if the service uses a different WebSocket address, using WSS in production. These are public connection settings, not places for credentials. For local development, configure the API address in `frontend/.env.local`. The Python service is not started by the frontend deployment.
+
 ### Prerequisites
 - Python 3.10+ (with `fastapi`, `uvicorn`, `numpy`, `pydantic`)
 - Node.js 18+ & npm
